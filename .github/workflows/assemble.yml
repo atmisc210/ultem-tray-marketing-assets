@@ -1,0 +1,24 @@
+name: assemble-jpg
+on:
+  push:
+    paths:
+      - 'chunks/**'
+jobs:
+  assemble:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assemble and commit JPEGs
+        run: |
+          set -e
+          mkdir -p out
+          cat chunks/vet_*.txt | tr -d '\n' | base64 -d > out/ultem-vet-surgical-tray-insert.jpg
+          cat chunks/den_*.txt | tr -d '\n' | base64 -d > out/ultem-dental-lab-tray-insert.jpg
+          file out/*.jpg
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add out/*.jpg
+          git diff --cached --quiet || git commit -m "Assemble ULTEM sample JPEGs"
+          git push
